@@ -36,31 +36,8 @@ Built with a clean and responsive UI, Learnify offers a seamless learning experi
 - 🎨 Smooth animations powered by Framer Motion
 - 🔍 Easy navigation and interactive components
 
----
 
-## 🧩 Folder Structure (Simplified)
 
-learnify/
-│
-├── app/
-│ ├── sign-in/
-│ ├── workspace/
-│ │ ├── \_components/
-│ │ │ ├── WelcomeBanner.jsx
-│ │ │ ├── CourseList.jsx
-│ │ │ └── EnrollCourseCard.jsx
-│ │ └── page.jsx
-│ └── layout.jsx
-│
-├── public/
-│ └── college-student.png
-│
-├── styles/
-│ └── globals.css
-│
-└── package.json
-
----
 
 ## ⚙️ Installation & Setup
 
