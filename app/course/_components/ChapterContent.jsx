@@ -1,5 +1,4 @@
 "use client";
-
 import { SelectedChapterIndexContext } from "@/context/SelectedChapterIndexContext";
 import React, { useContext } from "react";
 import YouTube from "react-youtube";
@@ -26,7 +25,6 @@ function ChapterContent({ courseInfo, refreshData }) {
   const chapterName =
     currentChapter?.courseData?.chapterName || "No Chapter Selected";
 
-  // ✅ Function to download topics
   const handleDownload = () => {
     if (!topics || topics.length === 0) {
       alert("No topics found to download.");
@@ -49,10 +47,9 @@ function ChapterContent({ courseInfo, refreshData }) {
     URL.revokeObjectURL(url);
   };
 
-  // ✅ Mark chapter completed for this specific course (by cid)
   const markChapterCompleted = async () => {
     try {
-      const cid = enrollCourse?.cid; // use your course unique id
+      const cid = enrollCourse?.cid;
       const completedChapter = enrollCourse?.completedChapters ?? [];
 
       if (completedChapter.includes(selectedChapterIndex)) {
@@ -60,65 +57,59 @@ function ChapterContent({ courseInfo, refreshData }) {
         return;
       }
 
-      // Add the newly completed chapter
       const updatedChapters = [...completedChapter, selectedChapterIndex];
-
       const result = await axios.put("/api/enroll-course", {
-        cid, // send cid instead of courseId
+        cid,
         completedChapter: updatedChapters,
       });
 
       if (result.status === 200) {
         toast.success("Chapter marked as completed!");
-        refreshData(); // refresh UI
+        refreshData();
       } else {
         toast.error("Failed to update chapter status!");
       }
     } catch (error) {
-      console.error("Error updating chapter:", error);
+      console.error(error);
       toast.error("Something went wrong!");
     }
   };
 
   return (
-    <div className="p-8 flex-1 overflow-hidden">
-      {/* Header */}
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="font-bold text-2xl text-gray-800">
-          {selectedChapterIndex + 1}. {chapterName}
+    <div className="p-4 sm:p-6 lg:p-8 flex-1 overflow-y-auto">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-3">
+        <h2 className="font-bold text-xl sm:text-2xl text-gray-800">
+          {chapterName}
         </h2>
-
-        <div className="flex space-x-3">
+        <div className="flex flex-wrap gap-2">
           <Button
             onClick={handleDownload}
-            className="bg-blue-600 hover:bg-blue-700 text-white"
+            className="bg-blue-600 hover:bg-blue-700 text-white text-sm px-3 py-2"
           >
             Download Content
           </Button>
-
           <Button
             onClick={markChapterCompleted}
-            className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2"
+            className="bg-green-600 hover:bg-green-700 text-white text-sm flex items-center gap-2 px-3 py-2"
           >
-            <CheckCircle size={18} />
+            <CheckCircle size={16} />
             Mark Completed
           </Button>
         </div>
       </div>
 
-      {/* Related Videos */}
-      <h2 className="my-2 font-bold text-lg text-blue-500">Related Videos</h2>
-      <div className="relative w-full overflow-x-auto">
-        <div className="flex space-x-6 py-4 min-w-max">
+      <h2 className="my-3 font-bold text-lg text-blue-500">Related Videos</h2>
+      <div className="w-full overflow-x-auto">
+        <div className="flex gap-4 sm:gap-6 py-3">
           {videoData?.map((video, index) => (
             <div
               key={index}
-              className="flex-none w-[360px] bg-white shadow-md rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 border border-gray-200"
+              className="flex-none w-[280px] sm:w-[360px] bg-white shadow-md rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 border border-gray-200"
             >
               <YouTube
                 videoId={video?.videoId}
                 opts={{
-                  width: "360",
+                  width: "100%",
                   height: "200",
                   playerVars: { autoplay: 0 },
                 }}
@@ -133,9 +124,8 @@ function ChapterContent({ courseInfo, refreshData }) {
         </div>
       </div>
 
-      {/* Topics Section */}
       <h2 className="my-4 font-bold text-lg text-green-600">Topics Covered</h2>
-      <div className="grid gap-3">
+      <div className="grid gap-3 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2">
         {topics?.length > 0 ? (
           topics.map((topic, index) => (
             <div
