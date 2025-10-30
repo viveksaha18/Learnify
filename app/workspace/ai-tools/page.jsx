@@ -1,87 +1,106 @@
 "use client";
-import React, { useState } from "react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { useState, useRef, useEffect } from "react";
 
-const allTools = [
-  {
-    name: "ChatGPT",
-    category: "Writing",
-    description: "Conversational AI that helps you write, learn, and code with ease.",
-    link: "https://chat.openai.com",
-  },
-  {
-    name: "Google Gemini",
-    category: "Learning",
-    description: "Multimodal AI assistant built for text, images, and code understanding.",
-    link: "https://gemini.google.com",
-  },
-  {
-    name: "GitHub Copilot",
-    category: "Coding",
-    description: "AI pair programmer that assists you in writing clean, efficient code.",
-    link: "https://github.com/features/copilot",
-  },
-  {
-    name: "Notion AI",
-    category: "Productivity",
-    description: "Boost your workflow with AI that writes, summarizes, and brainstorms.",
-    link: "https://www.notion.so/product/ai",
-  },
-];
+export default function ChatbotPage() {
+  const [messages, setMessages] = useState([]);
+  const [input, setInput] = useState("");
+  const [loading, setLoading] = useState(false);
+  const chatRef = useRef(null);
 
-export default function AIToolsPage() {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [filteredTools, setFilteredTools] = useState(allTools);
+  const sendMessage = async () => {
+    if (!input.trim()) return;
+    const userMessage = { role: "user", content: input };
+    setMessages((prev) => [...prev, userMessage]);
+    setInput("");
+    setLoading(true);
 
-  const handleSearch = () => {
-    const results = allTools.filter(
-      (tool) =>
-        tool.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        tool.category.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-    setFilteredTools(results);
+    try {
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: input }),
+      });
+
+      const data = await res.json();
+      const botMessage = { role: "assistant", content: data.reply };
+      setMessages((prev) => [...prev, botMessage]);
+    } catch (error) {
+      setMessages((prev) => [
+        ...prev,
+        { role: "assistant", content: "Error: Unable to connect to Gemini API." },
+      ]);
+    } finally {
+      setLoading(false);
+    }
   };
 
+  useEffect(() => {
+    if (chatRef.current) {
+      chatRef.current.scrollTop = chatRef.current.scrollHeight;
+    }
+  }, [messages]);
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white px-6 py-10 text-center">
-      <h1 className="text-5xl font-extrabold text-blue-700 mb-4">AI Tools Hub</h1>
-      <p className="text-gray-700 max-w-2xl mx-auto text-lg leading-relaxed mb-8">
-        Explore the most powerful <span className="font-semibold text-blue-600">AI tools</span> built
-        to make learning, coding, and productivity smarter. Search your favorite AI assistant and try it instantly.
-      </p>
+    <div className="min-h-screen bg-white flex flex-col items-center justify-center px-4 py-6 sm:py-10">
+      <div className="w-full max-w-3xl bg-gray-50 shadow-xl rounded-2xl p-4 sm:p-6 flex flex-col h-[80vh] sm:h-[85vh]">
+        {/* Header */}
+        <h2 className="text-2xl sm:text-3xl font-semibold text-gray-800 mb-4 text-center">
+          💬 Chatbot
+        </h2>
 
-      <div className="flex flex-col sm:flex-row justify-center gap-3 mb-10">
-        <Input
-          placeholder="Search by tool name or category..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full sm:w-80"
-        />
-        <Button onClick={handleSearch}>Search</Button>
-      </div>
+        {/* Chat Box */}
+        <div
+          ref={chatRef}
+          className="flex-1 overflow-y-auto border border-gray-200 rounded-xl p-3 sm:p-4 bg-white mb-4 scroll-smooth"
+        >
+          {messages.length === 0 ? (
+            <p className="text-center text-gray-400 text-sm sm:text-base mt-10">
+              Start a conversation 🤖
+            </p>
+          ) : (
+            messages.map((msg, i) => (
+              <div
+                key={i}
+                className={`my-2 flex ${
+                  msg.role === "user" ? "justify-end" : "justify-start"
+                }`}
+              >
+                <div
+                  className={`px-4 py-2 rounded-2xl max-w-[80%] sm:max-w-[70%] text-sm sm:text-base ${
+                    msg.role === "user"
+                      ? "bg-blue-500 text-white rounded-br-none"
+                      : "bg-gray-200 text-gray-800 rounded-bl-none"
+                  }`}
+                >
+                  {msg.content}
+                </div>
+              </div>
+            ))
+          )}
+          {loading && (
+            <p className="text-gray-500 text-sm italic mt-2">Gemini is thinking...</p>
+          )}
+        </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 justify-items-center">
-        {filteredTools.map((tool, index) => (
-          <div
-            key={index}
-            className="bg-white shadow-md rounded-2xl p-6 w-72 hover:shadow-xl transition duration-300"
+        {/* Input Area */}
+        <div className="flex items-center gap-2 sm:gap-3">
+          <input
+            type="text"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder="Type your message..."
+            onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+            className="flex-1 border border-gray-300 rounded-xl px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-blue-400"
+          />
+          <button
+            onClick={sendMessage}
+            disabled={loading}
+            className="bg-blue-500 hover:bg-blue-600 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-xl font-medium text-sm sm:text-base transition-all"
           >
-            <h2 className="text-xl font-bold text-blue-600 mb-2">{tool.name}</h2>
-            <p className="text-sm text-gray-500 mb-1">Category: {tool.category}</p>
-            <p className="text-gray-600 text-sm mb-4">{tool.description}</p>
-            <Button asChild>
-              <a href={tool.link} target="_blank" rel="noopener noreferrer">
-                Try Now
-              </a>
-            </Button>
-          </div>
-        ))}
+            {loading ? "..." : "Send"}
+          </button>
+        </div>
       </div>
-
-      {filteredTools.length === 0 && (
-        <p className="text-gray-500 mt-8">No tools found. Try a different search term.</p>
-      )}
     </div>
   );
 }

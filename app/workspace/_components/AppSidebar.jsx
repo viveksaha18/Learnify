@@ -28,7 +28,7 @@ const SideBarOptions = [
   { title: "Dashboard", icon: LayoutDashboard, path: "/workspace" },
   { title: "My Learning", icon: Book, path: "/workspace/my-learning" },
   { title: "Explore Courses", icon: Compass, path: "/workspace/explore" },
-  { title: "AI Tools", icon: PencilRulerIcon, path: "/workspace/ai-tools" },
+  { title: "Personalized-Chatbot", icon: PencilRulerIcon, path: "/workspace/ai-tools" },
   { title: "Profile", icon: UserCircle2Icon, path: "/workspace/profile" },
 ];
 
